@@ -6,9 +6,10 @@ data class Game(var chosenLocation: String,
                 var playerList: ArrayList<String>,
                 var playerObjectList: ArrayList<Player>,
                 var timeLimit: Long,
-                var locationList: ArrayList<String>
+                var locationList: ArrayList<String>,
+                var expiration: Long
 ){
 
-    constructor() : this("", ArrayList<String>(),false,ArrayList<String>(),ArrayList<Player>(),0.0.toLong(),ArrayList<String>())
+    constructor() : this("", ArrayList<String>(),false,ArrayList<String>(),ArrayList<Player>(),0.0.toLong(),ArrayList<String>(), 0)
 
 }
