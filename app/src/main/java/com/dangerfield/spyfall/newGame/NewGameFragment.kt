@@ -130,7 +130,7 @@ class NewGameFragment : Fragment() {
 
         viewModel.currentUser = playerName
         createGame(Game("",chosenPacks,false,
-            mutableListOf(playerName) as ArrayList, ArrayList(),timeLimit.toLong(), arrayListOf()))
+            mutableListOf(playerName) as ArrayList, ArrayList(),timeLimit.toLong(), arrayListOf(), 0))
     }
 
     private fun createGame(game: Game){

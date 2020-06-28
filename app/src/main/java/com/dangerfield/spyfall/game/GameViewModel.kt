@@ -2,8 +2,6 @@ package com.dangerfield.spyfall.game
 
 import android.os.CountDownTimer
 import android.util.Log
-import android.view.View
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.ViewModel;
 import com.crashlytics.android.Crashlytics
@@ -13,8 +11,6 @@ import com.google.android.gms.tasks.Task
 import com.google.firebase.firestore.FieldValue
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.ListenerRegistration
-import com.google.firebase.firestore.QuerySnapshot
-import kotlinx.android.synthetic.main.fragment_game.*
 import java.util.*
 import java.util.concurrent.TimeUnit
 import kotlin.collections.ArrayList
@@ -39,6 +35,7 @@ class GameViewModel : ViewModel() {
     private var timeLeft = MutableLiveData<String>()
     private lateinit var gameListener: ListenerRegistration
     var gameTimer : CountDownTimer? = null
+    private val millisecondsInSixHours = 21600000
 
     lateinit var currentUser: String
 
@@ -169,7 +166,8 @@ class GameViewModel : ViewModel() {
         // resets variables on firebase, which will update viewmodel
         val newLocation = gameObject.value!!.locationList.random()
         val newGame = Game(newLocation,gameObject.value!!.chosenPacks,false,
-            gameObject.value!!.playerList, ArrayList(),gameObject.value!!.timeLimit,gameObject.value!!.locationList )
+            gameObject.value!!.playerList, ArrayList(),gameObject.value!!.timeLimit,gameObject.value!!.locationList,
+            gameObject.value!!.expiration)
         gameRef.set(newGame)
     }
 
@@ -181,6 +179,7 @@ class GameViewModel : ViewModel() {
         getLocations(chosenPacks = game.chosenPacks) {locationList ->
             game.chosenLocation = locationList.random()
             game.locationList = locationList as ArrayList<String>
+            game.expiration = (System.currentTimeMillis() + millisecondsInSixHours)/1000
             gameObject.value = game
             ACCESS_CODE = code
             gameRef.set(game).addOnCompleteListener {
