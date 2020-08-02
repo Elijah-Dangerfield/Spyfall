@@ -54,7 +54,6 @@ class DBCleaner(private val db: FirebaseFirestore, private val constants: Consta
         } catch (e: Exception) {
             result.postValue(Resource.Error(error = "Failed to delete games"))
         }
-
         return result
     }
 }
