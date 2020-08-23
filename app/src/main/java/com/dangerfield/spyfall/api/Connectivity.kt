@@ -1,9 +1,11 @@
 package com.dangerfield.spyfall.api
 
 import com.dangerfield.spyfall.util.ConnectivityHelper
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import java.io.IOException
 
-class Connectivity : ConnectivityHelper{
+class Connectivity : ConnectivityHelper {
 
     /**
      * Checks whether device is currently online or not by Pinging a server
@@ -12,11 +14,14 @@ class Connectivity : ConnectivityHelper{
      */
 
     override suspend fun isOnline(): Boolean {
+
         val runtime = Runtime.getRuntime()
         try {
-            val ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8")
-            val exitValue = ipProcess.waitFor()
-            return exitValue == 0
+            val exitVal = withContext(Dispatchers.IO) {
+                val ipProcess = runtime.exec("/system/bin/ping -c 1 8.8.8.8")
+                return@withContext ipProcess.waitFor()
+            }
+            return exitVal == 0
         } catch (e: IOException) {
             e.printStackTrace()
         } catch (e: InterruptedException) {

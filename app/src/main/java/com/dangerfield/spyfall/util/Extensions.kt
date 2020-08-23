@@ -10,6 +10,8 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.TextView
+import androidx.lifecycle.LiveData
+import androidx.lifecycle.MutableLiveData
 import com.dangerfield.spyfall.models.Session
 import com.dangerfield.spyfall.ui.game.GameFragment
 import com.dangerfield.spyfall.ui.waiting.WaitingFragment
@@ -60,6 +62,10 @@ fun TextView.clear() {
 
 fun View.invisibleIf(condition: Boolean) {
     visibility = if(condition) View.INVISIBLE else View.VISIBLE
+}
+
+infix fun<T> MutableLiveData<Event<T>>.postEvent(event: Event<T>) {
+    this.postValue(event)
 }
 
 

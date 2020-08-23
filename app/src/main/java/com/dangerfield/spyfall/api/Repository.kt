@@ -116,7 +116,7 @@ class Repository(
         createGameJob = CoroutineScope(dispatcher).launch {
 
             if (!connectivityHelper.isOnline()) {
-                result.value = Resource.Error(error = NewGameError.NETWORK_ERROR)
+                result.postValue(Resource.Error(error = NewGameError.NETWORK_ERROR))
             } else {
 
                 try {
@@ -167,49 +167,45 @@ class Repository(
         joinGameJob = CoroutineScope(dispatcher).launch {
 
             if (!connectivityHelper.isOnline()) {
-                result.value = Event(Resource.Error(error = JoinGameError.NETWORK_ERROR))
+                result.postValue(Event(Resource.Error(error = JoinGameError.NETWORK_ERROR)))
             } else {
 
                 fireStoreService.getGame(accessCode).addOnSuccessListener { game ->
                     if (game == null) {
-                        result.value =
-                            Event(Resource.Error(error = JoinGameError.GAME_DOES_NOT_EXIST))
+                        result postEvent Event(Resource.Error(error = JoinGameError.GAME_DOES_NOT_EXIST))
                     } else {
                         when {
                             game.playerList.size >= 8 ->
-                                result.value =
-                                    Event(Resource.Error(error = JoinGameError.GAME_HAS_MAX_PLAYERS))
+                                result postEvent Event(Resource.Error(error = JoinGameError.GAME_HAS_MAX_PLAYERS))
 
                             game.started ->
-                                result.value =
-                                    Event(Resource.Error(error = JoinGameError.GAME_HAS_STARTED))
+                                result postEvent Event(Resource.Error(error = JoinGameError.GAME_HAS_STARTED))
 
                             game.playerList.contains(username) ->
-                                result.value =
-                                    Event(Resource.Error(error = JoinGameError.NAME_TAKEN))
+                                result postEvent Event(Resource.Error(error = JoinGameError.NAME_TAKEN))
 
                             else -> {
                                 addPlayer(username, accessCode).addOnSuccessListener {
                                     game.playerList.add(username)
                                     val currentSession = Session(accessCode, username, game)
-                                    result.value = Event(Resource.Success(currentSession))
+                                    result postEvent Event(Resource.Success(currentSession))
                                     preferencesHelper.saveSession(currentSession)
 
                                 }.addOnFailureListener {
-                                    result.value =
-                                        Event(
-                                            Resource.Error(
-                                                error = JoinGameError.COULD_NOT_JOIN,
-                                                exception = it
+                                    result postEvent
+                                            Event(
+                                                Resource.Error(
+                                                    error = JoinGameError.COULD_NOT_JOIN,
+                                                    exception = it
+                                                )
                                             )
-                                        )
                                 }
                             }
                         }
                     }
 
                 }.addOnFailureListener {
-                    result.value = Event(Resource.Error(error = JoinGameError.UNKNOWN_ERROR))
+                    result postEvent Event(Resource.Error(error = JoinGameError.UNKNOWN_ERROR))
                 }
             }
         }
@@ -228,12 +224,11 @@ class Repository(
                 sessionListenerService.removeListener()
                 preferencesHelper.removeSavedSession()
                 if (numberOfPlayersBeforeLeaving > 1) {
-                    leaveGameEvent.value = Event(Resource.Success(Unit))
+                    leaveGameEvent postEvent Event(Resource.Success(Unit))
                 }
                 //otherwise let the session ended trigger take care of user experience
             }.addOnFailureListener {
-                leaveGameEvent.value =
-                    Event(Resource.Error(error = LeaveGameError.UNKNOWN_ERROR, exception = it))
+                leaveGameEvent postEvent Event(Resource.Error(error = LeaveGameError.UNKNOWN_ERROR, exception = it))
             }
     }
 
@@ -242,10 +237,10 @@ class Repository(
             .addOnSuccessListener {
                 sessionListenerService.removeListener()
                 preferencesHelper.removeSavedSession()
-                removeInactiveUserEvent.value = Event(Resource.Success(Unit))
+                removeInactiveUserEvent postEvent Event(Resource.Success(Unit))
             }.addOnFailureListener {
-                removeInactiveUserEvent.value =
-                    Event(Resource.Error(error = Unit, exception = it))
+                removeInactiveUserEvent postEvent
+                        Event(Resource.Error(error = Unit, exception = it))
             }
     }
 
@@ -409,18 +404,18 @@ class Repository(
         CoroutineScope(dispatcher).launch {
 
             if (!connectivityHelper.isOnline()) {
-                result.value = Resource.Error(error = PackDetailsError.NETWORK_ERROR)
+                result.postValue(Resource.Error(error = PackDetailsError.NETWORK_ERROR))
             } else {
                 fireStoreService.getPackDetails().addOnSuccessListener {
                     if (it != null && packsDetailsIsFull(it)) {
-                        result.value = Resource.Success(it)
+                        result.postValue(Resource.Success(it))
                     } else {
-                        result.value =
-                            Resource.Error(error = PackDetailsError.UNKNOWN_ERROR)
+                        result.postValue(Resource.Error(error = PackDetailsError.UNKNOWN_ERROR))
                     }
                 }.addOnFailureListener {
-                    result.value =
+                    result.postValue(
                         Resource.Error(error = PackDetailsError.UNKNOWN_ERROR, exception = it)
+                    )
                 }
             }
         }
