@@ -35,15 +35,14 @@ class TesterSettingsFragment : Fragment(R.layout.fragment_tester_settings) {
 
         btn_clean_db.setOnClickListener {
             showDbCleanLoading()
-            CoroutineScope(Dispatchers.IO).launch {
-                dbCleaner.cleandb()
-                    .observe(viewLifecycleOwner, Observer {
-                        when (it) {
-                            is Resource.Success -> it.data?.let { s -> handleCleanDbMessage(s) }
-                            is Resource.Error -> it.error?.let { e -> handleCleanDbMessage(e) }
-                        }
-                    })
-            }
+            dbCleaner.cleandb()
+                .observe(viewLifecycleOwner, Observer {
+                    when (it) {
+                        is Resource.Success -> it.data?.let { s -> handleCleanDbMessage(s) }
+                        is Resource.Error -> it.error?.let { e -> handleCleanDbMessage(e) }
+                    }
+                })
+
         }
     }
 
