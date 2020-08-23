@@ -169,47 +169,54 @@ class Repository(
             if (!connectivityHelper.isOnline()) {
                 result.postValue(Event(Resource.Error(error = JoinGameError.NETWORK_ERROR)))
             } else {
+                try {
+                    if(!accessCode.isAlphaNumeric) {
+                        result postEvent Event(Resource.Error(error = JoinGameError.CODE_NOT_ALPHANUMERIC))
+                        return@launch
+                    }
+                    fireStoreService.getGame(accessCode).addOnSuccessListener { game ->
+                        if (game == null) {
+                            result postEvent Event(Resource.Error(error = JoinGameError.GAME_DOES_NOT_EXIST))
+                        } else {
+                            when {
+                                game.playerList.size >= 8 ->
+                                    result postEvent Event(Resource.Error(error = JoinGameError.GAME_HAS_MAX_PLAYERS))
 
-                fireStoreService.getGame(accessCode).addOnSuccessListener { game ->
-                    if (game == null) {
-                        result postEvent Event(Resource.Error(error = JoinGameError.GAME_DOES_NOT_EXIST))
-                    } else {
-                        when {
-                            game.playerList.size >= 8 ->
-                                result postEvent Event(Resource.Error(error = JoinGameError.GAME_HAS_MAX_PLAYERS))
+                                game.started ->
+                                    result postEvent Event(Resource.Error(error = JoinGameError.GAME_HAS_STARTED))
 
-                            game.started ->
-                                result postEvent Event(Resource.Error(error = JoinGameError.GAME_HAS_STARTED))
+                                game.playerList.contains(username) ->
+                                    result postEvent Event(Resource.Error(error = JoinGameError.NAME_TAKEN))
 
-                            game.playerList.contains(username) ->
-                                result postEvent Event(Resource.Error(error = JoinGameError.NAME_TAKEN))
+                                else -> {
+                                    addPlayer(username, accessCode)
+                                        .addOnSuccessListener {
+                                            game.playerList.add(username)
+                                            val currentSession = Session(accessCode, username, game)
+                                            result postEvent Event(Resource.Success(currentSession))
+                                            preferencesHelper.saveSession(currentSession)
 
-                            else -> {
-                                addPlayer(username, accessCode).addOnSuccessListener {
-                                    game.playerList.add(username)
-                                    val currentSession = Session(accessCode, username, game)
-                                    result postEvent Event(Resource.Success(currentSession))
-                                    preferencesHelper.saveSession(currentSession)
-
-                                }.addOnFailureListener {
-                                    result postEvent
-                                            Event(
-                                                Resource.Error(
-                                                    error = JoinGameError.COULD_NOT_JOIN,
-                                                    exception = it
-                                                )
-                                            )
+                                        }.addOnFailureListener {
+                                            result postEvent
+                                                    Event(
+                                                        Resource.Error(
+                                                            error = JoinGameError.COULD_NOT_JOIN,
+                                                            exception = it
+                                                        )
+                                                    )
+                                        }
                                 }
                             }
                         }
-                    }
 
-                }.addOnFailureListener {
+                    }.addOnFailureListener {
+                        result postEvent Event(Resource.Error(error = JoinGameError.UNKNOWN_ERROR))
+                    }
+                } catch (e: Exception) {
                     result postEvent Event(Resource.Error(error = JoinGameError.UNKNOWN_ERROR))
                 }
             }
         }
-
         return result
     }
 
@@ -228,7 +235,12 @@ class Repository(
                 }
                 //otherwise let the session ended trigger take care of user experience
             }.addOnFailureListener {
-                leaveGameEvent postEvent Event(Resource.Error(error = LeaveGameError.UNKNOWN_ERROR, exception = it))
+                leaveGameEvent postEvent Event(
+                    Resource.Error(
+                        error = LeaveGameError.UNKNOWN_ERROR,
+                        exception = it
+                    )
+                )
             }
     }
 

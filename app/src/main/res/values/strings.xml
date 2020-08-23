@@ -87,6 +87,7 @@
     <string name="join_game_error_taken_name">Sorry, that name is taken by another player</string>
     <string name="join_game_error_access_code">Sorry, no game was found with that access code</string>
     <string name="join_game_error_could_not_join" translatable="false">Sorry, this game could not be joined</string>
+    <string name="join_game_error_code_alphanumberic" translatable="false">Sorry, the code provided needs to be alphanumeric</string>
 
     <string name="string_join_access_hint"><u>Access code</u></string>
     <string name="string_join_name_hint"><u>Enter a username</u></string>

@@ -110,11 +110,15 @@ class StartFragment : Fragment(R.layout.fragment_start) {
         welcome_message.startAnimation(AnimationUtils.loadAnimation(context, R.anim.bounce))
 
         btn_new_game.setOnClickListener {
-            navController.navigate(R.id.action_startFragment_to_newGameFragment)
+            if (navController.currentDestination?.id == R.id.startFragment) {
+                navController.navigate(R.id.action_startFragment_to_newGameFragment)
+            }
         }
 
         btn_join_game.setOnClickListener {
-            navController.navigate(R.id.action_startFragment_to_joinGameFragment)
+            if (navController.currentDestination?.id == R.id.startFragment) {
+                navController.navigate(R.id.action_startFragment_to_joinGameFragment)
+            }
         }
 
         btn_rules.setOnClickListener { showRulesDialog() }

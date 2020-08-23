@@ -16,6 +16,7 @@ enum class JoinGameError(val resId: Int? = null) {
     NAME_TAKEN(R.string.join_game_error_taken_name),
     NAME_CHARACTER_LIMIT(R.string.change_name_character_limit),
     COULD_NOT_JOIN(R.string.join_game_error_could_not_join),
+    CODE_NOT_ALPHANUMERIC(R.string.join_game_error_code_alphanumberic),
     UNKNOWN_ERROR(R.string.unknown_error),
     NETWORK_ERROR
 }

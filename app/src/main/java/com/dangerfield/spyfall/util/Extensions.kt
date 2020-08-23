@@ -3,19 +3,17 @@ package com.dangerfield.spyfall.util
 import android.app.Activity
 import android.os.Bundle
 import android.text.InputFilter
-import android.text.TextUtils
-import android.util.Log
 import android.util.Patterns
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.EditText
 import android.widget.TextView
-import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import com.dangerfield.spyfall.models.Session
 import com.dangerfield.spyfall.ui.game.GameFragment
 import com.dangerfield.spyfall.ui.waiting.WaitingFragment
 import kotlinx.coroutines.*
+import java.util.regex.Pattern
 
 
 fun EditText.addCharacterMax(max: Int){
@@ -66,6 +64,13 @@ fun View.invisibleIf(condition: Boolean) {
 
 infix fun<T> MutableLiveData<Event<T>>.postEvent(event: Event<T>) {
     this.postValue(event)
+}
+
+val String.isAlphaNumeric: Boolean
+get() {
+    val p: Pattern = Pattern.compile("[^a-zA-Z0-9]")
+    val hasSpecialChar: Boolean = p.matcher(this).find()
+    return !hasSpecialChar
 }
 
 
